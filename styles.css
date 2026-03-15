@@ -8,6 +8,7 @@
 html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -188,13 +189,29 @@ body:not(.rtl) .hosts-container {
 
 /* Hosts inline layout */
 .hosts-container {
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
     flex-direction: row;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
     justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
     align-items: center;
     gap: 40px;
     width: 100%;
     text-align: center;
+}
+
+/* Safari gap fallback for hosts */
+@supports not (gap: 40px) {
+    .hosts-container > * {
+        margin: 0 20px;
+    }
 }
 
 .hosts-spacer {
@@ -251,6 +268,7 @@ body.rtl .host2 {
 
 .h-screen {
     height: 100vh;
+    height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile browsers */
 }
 
@@ -411,13 +429,21 @@ body.rtl .host2 {
     left: 0;
     width: 100%;
     height: 100vh;
+    height: -webkit-fill-available;
     height: 100dvh; /* Dynamic viewport height for mobile browsers */
     background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
     align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
     justify-content: center;
     z-index: 1000;
     cursor: pointer;
+    -webkit-transition: opacity 1s ease, visibility 1s ease;
     transition: opacity 1s ease, visibility 1s ease;
     -webkit-tap-highlight-color: transparent;
 }
@@ -471,9 +497,16 @@ body.rtl .host2 {
 
 .section {
     min-height: 100vh;
+    min-height: -webkit-fill-available;
     min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
     align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
     justify-content: center;
     padding: 80px 20px;
     position: relative;
@@ -522,11 +555,23 @@ body.rtl .host2 {
 
 /* New circular scratch cards */
 .scratch-circles-container {
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
     justify-content: center;
     gap: 25px;
     margin-bottom: 30px;
+    -webkit-flex-wrap: wrap;
     flex-wrap: wrap;
+}
+
+/* Safari gap fallback */
+@supports not (gap: 25px) {
+    .scratch-circles-container > * {
+        margin: 12px;
+    }
 }
 
 .scratch-circle {
@@ -535,6 +580,7 @@ body.rtl .host2 {
     height: 110px;
     border-radius: 50%;
     overflow: hidden;
+    -webkit-box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
@@ -612,8 +658,17 @@ body.rtl .host2 {
     z-index: 100;
 }
 
-/* Scroll lock */
+/* Scroll lock - iOS Safari fix */
 body.scroll-locked {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    -webkit-overflow-scrolling: none;
+    touch-action: none;
+}
+
+html.scroll-locked {
     overflow: hidden;
 }
 
@@ -622,15 +677,33 @@ body.scroll-locked {
 /* ==================== */
 
 .countdown-container {
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
     justify-content: center;
     gap: 25px;
     margin-bottom: 25px;
 }
 
+/* Safari gap fallback */
+@supports not (gap: 25px) {
+    .countdown-container > * {
+        margin: 0 12px;
+    }
+}
+
 .countdown-item {
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
     flex-direction: column;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
     align-items: center;
     min-width: 70px;
 }
@@ -930,16 +1003,16 @@ body.scroll-locked {
     }
     
     .quran-verse {
-        font-size: 14px;
+        font-size: 13px;
         line-height: 1.5;
         text-align: center;
-        max-width: 65%;
+        max-width: 60%;
         margin-left: auto;
         margin-right: auto;
     }
     
     .host1, .host2 {
-        font-size: 15px;
+        font-size: 10px;
         text-align: center;
     }
     
@@ -950,7 +1023,7 @@ body.scroll-locked {
     }
     
     .hosts-container {
-        gap: 15px;
+        gap: 12px;
         flex-direction: row;
         align-items: center;
     }
@@ -1174,14 +1247,14 @@ body.scroll-locked {
     
     /* Arabic elements for extra small phones */
     .quran-verse {
-        font-size: 11px;
+        font-size: 9px;
         line-height: 1.4;
         text-align: center;
-        max-width: 60%;
+        max-width: 55%;
     }
     
     .host1, .host2 {
-        font-size: 13px;
+        font-size: 11px;
         text-align: center;
     }
     
@@ -1191,7 +1264,7 @@ body.scroll-locked {
     }
     
     .hosts-container {
-        gap: 10px;
+        gap: 8px;
         flex-direction: row;
         align-items: center;
     }

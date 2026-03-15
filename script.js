@@ -281,6 +281,7 @@ function startScrollObserver() {
 let revealedCircles = [false, false, false];
 let scrollLocked = false;
 let confettiTriggered = false;
+let scrollPosition = 0;
 
 function initScratchCard() {
     const circles = document.querySelectorAll('.scratch-circle');
@@ -297,9 +298,16 @@ function initScratchCard() {
         let lastPoint = null;
         let scratchedPixels = 0;
         let totalPixels = 0;
+        let canvasInitialized = false;
         
         function initCanvas() {
+            // Don't reinitialize if already revealed
+            if (revealedCircles[index]) return;
+            
             const rect = circle.getBoundingClientRect();
+            // Only reinitialize if size actually changed significantly
+            if (canvasInitialized && Math.abs(canvas.width - rect.width) < 5) return;
+            
             canvas.width = rect.width;
             canvas.height = rect.height;
             totalPixels = canvas.width * canvas.height;
@@ -332,10 +340,17 @@ function initScratchCard() {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('SCRATCH', canvas.width / 2, canvas.height / 2);
+            
+            canvasInitialized = true;
         }
         
         setTimeout(initCanvas, 100);
-        window.addEventListener('resize', initCanvas);
+        // Debounce resize to prevent frequent reinit
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(initCanvas, 250);
+        });
         
         function getPosition(e) {
             const rect = canvas.getBoundingClientRect();
@@ -454,9 +469,27 @@ function setupScrollLock() {
     observer.observe(revealSection);
 }
 
+// Prevent touchmove when scroll is locked
+function preventScroll(e) {
+    if (scrollLocked) {
+        // Allow touch on scratch canvases
+        if (e.target.classList.contains('scratch-canvas-circle')) {
+            return;
+        }
+        e.preventDefault();
+    }
+}
+
 function lockScroll() {
     scrollLocked = true;
+    scrollPosition = window.pageYOffset;
+    
     document.body.classList.add('scroll-locked');
+    document.documentElement.classList.add('scroll-locked');
+    document.body.style.top = `-${scrollPosition}px`;
+    
+    // Add touch event listener for iOS
+    document.addEventListener('touchmove', preventScroll, { passive: false });
     
     // Scroll to reveal section
     const revealSection = document.getElementById('revealSection');
@@ -467,7 +500,16 @@ function lockScroll() {
 
 function unlockScroll() {
     scrollLocked = false;
+    
     document.body.classList.remove('scroll-locked');
+    document.documentElement.classList.remove('scroll-locked');
+    document.body.style.top = '';
+    
+    // Restore scroll position
+    window.scrollTo(0, scrollPosition);
+    
+    // Remove touch event listener
+    document.removeEventListener('touchmove', preventScroll);
     
     const scrollHint = document.getElementById('scrollHint');
     if (scrollHint) {
