@@ -281,7 +281,6 @@ function startScrollObserver() {
 let revealedCircles = [false, false, false];
 let scrollLocked = false;
 let confettiTriggered = false;
-let scrollPosition = 0;
 
 function initScratchCard() {
     const circles = document.querySelectorAll('.scratch-circle');
@@ -450,23 +449,44 @@ function initScratchCard() {
     setupScrollLock();
 }
 
+let isScrollingToSection = false;
+
 function setupScrollLock() {
     const revealSection = document.getElementById('revealSection');
     if (!revealSection) return;
     
+    // Observer to detect when section comes into view
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-                // Check if all circles are revealed
+            // When section starts to appear (even partially)
+            if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
                 const allRevealed = revealedCircles.every(r => r === true);
-                if (!allRevealed && !scrollLocked) {
-                    lockScroll();
+                
+                if (!allRevealed && !scrollLocked && !isScrollingToSection) {
+                    // Slide to section then lock
+                    slideToSectionAndLock(revealSection);
                 }
             }
         });
-    }, { threshold: [0.5] });
+    }, { threshold: [0.1, 0.3, 0.5, 0.7, 1.0] });
     
     observer.observe(revealSection);
+}
+
+function slideToSectionAndLock(section) {
+    isScrollingToSection = true;
+    
+    // Smoothly scroll to center the section
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Wait for scroll to complete, then lock
+    setTimeout(() => {
+        const allRevealed = revealedCircles.every(r => r === true);
+        if (!allRevealed) {
+            lockScroll();
+        }
+        isScrollingToSection = false;
+    }, 600);
 }
 
 // Prevent touchmove when scroll is locked
@@ -482,20 +502,12 @@ function preventScroll(e) {
 
 function lockScroll() {
     scrollLocked = true;
-    scrollPosition = window.pageYOffset;
     
     document.body.classList.add('scroll-locked');
     document.documentElement.classList.add('scroll-locked');
-    document.body.style.top = `-${scrollPosition}px`;
     
     // Add touch event listener for iOS
     document.addEventListener('touchmove', preventScroll, { passive: false });
-    
-    // Scroll to reveal section
-    const revealSection = document.getElementById('revealSection');
-    if (revealSection) {
-        revealSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
 }
 
 function unlockScroll() {
@@ -503,10 +515,6 @@ function unlockScroll() {
     
     document.body.classList.remove('scroll-locked');
     document.documentElement.classList.remove('scroll-locked');
-    document.body.style.top = '';
-    
-    // Restore scroll position
-    window.scrollTo(0, scrollPosition);
     
     // Remove touch event listener
     document.removeEventListener('touchmove', preventScroll);
